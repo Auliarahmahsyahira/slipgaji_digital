@@ -161,7 +161,10 @@
   @endif
 </div>
 
-<a href="{{ route('pegawai.slip.pdf', $gaji->id_gaji) }}" class="btn btn-primary">
-  Cetak PDF
-</a>
+@if($gaji)
+  <a href="{{ route('pegawai.slip.pdf', $gaji->id_gaji) }}" class="btn btn-primary">
+    Cetak PDF
+  </a>
+@endif
+
 @endsection

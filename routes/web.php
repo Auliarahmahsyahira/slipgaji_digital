@@ -36,6 +36,9 @@ Route::post('/pegawai/store', [PegawaiController::class, 'store'])->name('pegawa
 Route::delete('/pegawai/{id}', [PegawaiController::class, 'destroy'])->name('pegawai.destroy');
 Route::get('/pegawai/edit/{id}', [PegawaiController::class, 'edit'])->name('pegawai.edit');
 Route::put('/pegawai/update/{id}', [PegawaiController::class, 'update'])->name('pegawai.update');
+// Pegawai Import
+Route::post('/pegawai/import', [PegawaiController::class, 'import'])->name('pegawai.import');
+
 
 // Membuat Komponen Gaji
 Route::get('/komponen/index', [KomponenController::class, 'index'])->name('komponen.index');
@@ -52,7 +55,12 @@ Route::get('/cek-nip/{nip}', [GajiController::class, 'cekNip'])->name('cek.nip')
 Route::post('/slipgaji/store', [GajiController::class, 'store'])->name('slipgaji.store');
 Route::post('/slipgaji/edit-selected', [GajiController::class, 'editSelected'])->name('slipgaji.editSelected');
 Route::get('/slipgaji/edit/{id}', [GajiController::class, 'edit'])->name('slipgaji.edit');
+Route::get('/slipgaji/edit2/{id}', [GajiController::class, 'edit2'])->name('slipgaji.edit2');
 Route::put('/slipgaji/update/{id}', [GajiController::class, 'update'])->name('slipgaji.update');
+Route::put('/slipgaji/update2/{id}', [GajiController::class, 'update2'])->name('slipgaji.update2');
 Route::delete('/slipgaji/deleteSelected', [GajiController::class, 'deleteSelected'])->name('slipgaji.deleteSelected');
-Route::post('/gaji/import', [GajiController::class, 'importExcel'])->name('gaji.import');
 
+// Slip Gaji Import
+Route::get('/gaji/import', [GajiController::class, 'showImportForm'])->name('gaji.import.form');
+Route::post('/gaji/import/tetap', [GajiController::class, 'importTetap'])->name('gaji.import.tetap');
+Route::post('/gaji/import/bulanan', [GajiController::class, 'importBulanan'])->name('gaji.import.bulanan');

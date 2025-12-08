@@ -9,7 +9,7 @@
 <body class="bg-warning bg-opacity-75">
   <header class="bg-warning py-3 shadow-sm">
     <div class="container d-flex justify-content-between align-items-center">
-      <img src="{{ asset('image/logokemanag1.png') }}" alt="Logo Kemenag" class="img-fluid" style="height:55px;">
+      <img src="{{ asset('image/logokemanag.png') }} }}" alt="Logo Kemenag" class="img-fluid" style="height:55px;">
       <div class="text-center flex-grow-1">
         <h1 class="h5 fw-bold mb-0 text-dark">SLIP GAJI DIGITAL</h1>
         <p class="mb-0 text-dark">KANWIL KEMENAG PROV. KEPRI</p>

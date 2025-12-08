@@ -22,14 +22,6 @@
           </div>
         </div>
 
-        <div class="row mb-3">
-          <div class="col-md-3 fw-semibold">NIP</div>
-          <div class="col-md-9">
-            <input type="text" name="nip_pegawai" id="nip_pegawai" class="form-control border-0 border-bottom bg-light-subtle"
-              value="{{ $gaji->nip_pegawai }}" required>
-          </div>
-        </div>
-
         <div class="row">
           <div class="col-md-3 fw-semibold">Nama</div>
           <div class="col-md-9">
@@ -140,48 +132,6 @@
           </div>
         </div>
 
-        @foreach($komponen as $item)
-          @if($item->tipe == 'potongan' && $item->kategori == 'lainnya')
-            @php
-              $nilai = ($gaji->potongan ?? collect())->where('id_komponen', $item->id_komponen)->first()->nominal ?? 0;
-            @endphp
-            <div class="row mb-3">
-              <div class="col-md-3 fw-semibold">{{ $item->nama_komponen }}</div>
-              <div class="col-md-9">
-                <div class="input-group">
-                  <input type="number" step="any" class="form-control border-0 border-bottom bg-light-subtle text-end hitung-total"
-                    name="nominal[{{ $item->id_komponen }}]" value="{{ $nilai }}" placeholder="0">
-                  <span class="input-group-text bg-light-subtle border-0 border-bottom">Rp</span>
-                </div>
-              </div>
-            </div>
-          @endif
-        @endforeach
-
-        {{-- Total Potongan --}}
-        <div class="row mt-4">
-          <div class="col-md-3 fw-semibold text-danger">Total Potongan</div>
-          <div class="col-md-9">
-            <input type="text" id="total_potongan_tampil" readonly
-              class="form-control border-0 border-bottom bg-light-subtle text-end"
-              value="{{ number_format($gaji->total_potongan, 0, ',', '.') }}">
-            <input type="hidden" name="total_potongan" id="total_potongan" value="{{ $gaji->total_potongan }}">
-          </div>
-        </div>
-
-        {{-- Gaji Diterima --}}
-        <div class="row mt-3">
-          <div class="col-md-3 fw-semibold text-primary">Gaji Diterima</div>
-          <div class="col-md-9">
-            <input type="text" id="gaji_diterima_tampil" readonly
-              class="form-control border-0 border-bottom bg-light-subtle text-end"
-              value="{{ number_format($gaji->gaji_diterima, 0, ',', '.') }}">
-            <input type="hidden" name="gaji_diterima" id="gaji_diterima" value="{{ $gaji->gaji_diterima }}">
-          </div>
-        </div>
-      </div>
-    </div>
-
     {{-- TOMBOL UPDATE --}}
     <div class="text-center mt-5 mb-4">
       <button type="submit" class="btn btn-dark px-5 py-2 fw-semibold shadow-sm">Update</button>
@@ -222,15 +172,6 @@
       const gajiBersih = totalKotor - totalPotongan;
       document.getElementById('jumlah_bersih_tampil').value = gajiBersih.toLocaleString('id-ID');
       document.getElementById('jumlah_bersih').value = gajiBersih;
-
-      let potonganLain = 0;
-      document.querySelectorAll('.hitung-total').forEach(el => potonganLain += Number(el.value) || 0);
-      document.getElementById('total_potongan_tampil').value = potonganLain.toLocaleString('id-ID');
-      document.getElementById('total_potongan').value = potonganLain;
-
-      const gajiDiterima = gajiBersih - potonganLain;
-      document.getElementById('gaji_diterima_tampil').value = gajiDiterima.toLocaleString('id-ID');
-      document.getElementById('gaji_diterima').value = gajiDiterima;
     }
 
     document.addEventListener('input', e => {

@@ -6,48 +6,61 @@
   <title>Slip Gaji Pegawai</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    body {
-      background-color: #f8c146;
-    }
-    header {
-      background-color: #ffc107;
-    }
-    .navbar-menu {
-      background-color: #f5b700;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      position: sticky;
-    }
-    .navbar-menu a {
-      color: #000;
-      font-weight: 500;
-      padding: 10px 20px;
-      text-decoration: none;
-      transition: all 0.3s ease;
-    }
-    .navbar-menu a:hover {
-      background-color: rgba(0,0,0,0.1);
-      border-radius: 8px;
-    }
-    main {
-      padding: 100px 50px;
-      text-align: center;
-    }
-    .welcome {
-      color: rgba(0,0,0,0.7);
-      font-weight: 700;
-      text-shadow: 1px 1px rgba(0,0,0,0.2);
-    }
-    .subtext {
-      color: rgba(0,0,0,0.6);
-      font-size: 18px;
-    }
-    nav {
-    padding:5px;
-    position:sticky;
-    top:0;
-    z-index: 2000; 
-}
-  </style>
+  body {
+    background-color: #f8c146;
+  }
+  header {
+    background-color: #ffc107;
+  }
+  .navbar-menu {
+    background-color: #f5b700;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 2000;
+  }
+  .navbar-menu a {
+    color: #000;
+    font-weight: 500;
+    padding: 10px 20px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+  .navbar-menu a:hover {
+    background-color: rgba(0,0,0,0.1);
+    border-radius: 8px;
+  }
+  main {
+    padding: 100px 50px;
+    text-align: center;
+  }
+  .welcome {
+    color: rgba(0,0,0,0.7);
+    font-weight: 700;
+    text-shadow: 1px 1px rgba(0,0,0,0.2);
+  }
+  .subtext {
+    color: rgba(0,0,0,0.6);
+    font-size: 18px;
+  }
+  nav {
+    padding: 5px;
+  }
+
+  /* FIX modal biar selalu di atas navbar */
+  .modal {
+    z-index: 5000 !important;
+  }
+  .modal-backdrop {
+    z-index: 4000 !important;
+  }
+
+  /* Biar konten tidak kena navbar sticky */
+  main {
+    padding-top: 120px !important;
+  }
+</style>
+
 </head>
 <body>
   <!-- HEADER -->

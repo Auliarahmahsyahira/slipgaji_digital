@@ -9,7 +9,13 @@
   <div class="d-flex justify-content-between align-items-center mb-3" style="font-family: 'Times New Roman', Times, serif;">
     
     {{-- Tombol Create di kiri --}}
+    <div class="d-flex gap-2">
+    {{-- Tombol Create di kiri --}}
     <a href="{{ route('pegawai.create') }}" class="btn btn-success px-4" style="background-color: #006316;">Create</a>
+
+    {{-- Tombol Import --}}
+    <button class="btn btn-success px-4" style="background-color: #006316;" data-bs-toggle="modal" data-bs-target="#modalImport">Import</button>
+  </div>
 
     {{-- Pencarian di kanan --}}
     <form method="GET" action="{{ route('pegawai.index') }}" class="input-group w-auto">
@@ -83,4 +89,28 @@
     document.querySelectorAll('.checkItem').forEach(cb => cb.checked = checked);
   });
 </script>
+
+<!-- Modal Import -->
+<div class="modal fade" id="modalImport" tabindex="-1">
+  <div class="modal-dialog">
+    <form method="POST" action="{{ route('pegawai.import') }}" enctype="multipart/form-data" class="modal-content">
+      @csrf
+      <div class="modal-header">
+        <h5 class="modal-title">Import Data Pegawai</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <label for="file" class="form-label">Upload File Excel (.xlsx)</label>
+        <input type="file" name="file" class="form-control" required>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="submit" class="btn btn-success">Import</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 @endsection
