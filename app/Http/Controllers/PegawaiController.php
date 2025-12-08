@@ -4,6 +4,8 @@
 
     use App\Models\Pegawai;
     use App\Models\User;
+    use Maatwebsite\Excel\Facades\Excel;
+    use App\Imports\PegawaiImport;
     use Illuminate\Http\Request;
     use Illuminate\Support\Facades\Hash;
 
@@ -108,5 +110,16 @@
 
             return redirect()->route('pegawai.index')->with('success', 'Data berhasil dihapus!');
         }
-    }
+
+        public function import(Request $request)
+        {
+            $request->validate([
+            'file' => 'required|mimes:xlsx,xls'
+            ]);
+
+            Excel::import(new PegawaiImport, $request->file('file'));
+
+            return redirect()->route('pegawai.index')->with('success', 'Data pegawai berhasil diimport!');
+}
+        }
     
