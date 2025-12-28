@@ -28,7 +28,9 @@ public function checkNip(Request $request)
     }
 
     // Jika ditemukan, arahkan ke halaman password
-    return redirect()->route('login.password', ['nip' => $request->nip_pegawai]);
+    return redirect()
+            ->route('login.password', ['nip' => $request->nip_pegawai])
+            ->with('success', 'NIP ditemukan');
 }
 
 public function showLoginPassword($nip)

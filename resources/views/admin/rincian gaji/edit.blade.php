@@ -47,6 +47,18 @@
           @enderror
         </div>
 
+        {{-- Periode --}}
+        <div class="mb-3">
+          <label for="periode" class="form-label fw-bold">Periode</label>
+          <select name="periode" id="periode" class="form-select @error('periode') is-invalid @enderror">
+            <option value="24" {{ $komponen->periode == '24' ? 'selected' : '' }}>2 Tahun</option>
+            <option value="1" {{ $komponen->periode == '1' ? 'selected' : '' }}>Bulanan</option>
+          </select>
+          @error('periode')
+            <div class="text-danger small">{{ $message }}</div>
+          @enderror
+        </div>
+
         {{-- Tombol Aksi --}}
         <div class="text-end">
           <a href="{{ route('komponen.index') }}" class="btn btn-secondary">Batal</a>

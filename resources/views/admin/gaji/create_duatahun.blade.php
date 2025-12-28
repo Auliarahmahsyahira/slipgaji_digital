@@ -6,7 +6,7 @@
       <h4 class="fw-bold text-dark text-shadow-sm">Input Slip Gaji Pegawai</h4>
     </div>
 
-    <form action="{{ route('slipgaji.store') }}" method="POST">
+    <form action="{{ route('slipgaji.store.duatahun') }}" method="POST">
       @csrf
 
       {{-- IDENTITAS PEGAWAI --}}
@@ -18,7 +18,7 @@
           <div class="row mb-3">
             <div class="col-md-3 fw-semibold">Periode</div>
             <div class="col-md-9">
-              <input type="month" name="periode" class="form-control border-0 border-bottom bg-light-subtle" required>
+              <input type="text" name="periode" class="form-control border-0 border-bottom bg-light-subtle" placeholder="Misal 2024-2025" required>
             </div>
           </div>
         <div class="row mb-3">
@@ -101,58 +101,16 @@
             @endif
           @endforeach
 
-          {{-- Jumlah Potongan --}}
           <div class="row mt-4">
+            {{-- Jumlah Potongan --}}
             <div class="col-md-3 fw-semibold text-danger">Jumlah Potongan</div>
             <div class="col-md-9">
               <input type="text" id="jumlah_potongan" readonly class="form-control border-0 border-bottom bg-light-subtle text-end">
             </div>
-          </div>
-        </div>
-      </div>
-
-      {{-- POTONGAN LAINNYA --}}
-      <div class="card shadow-sm mb-4 border-0 w-75 mx-auto bg-body-tertiary">
-        <div class="card-header fw-semibold bg-white border-0 text-secondary">
-          Potongan Lainnya
-        </div>
-        <div class="card-body bg-white rounded">
-          {{-- Gaji Bersih --}}
-          <div class="row mb-3">
+            {{-- Gaji Bersih --}}
             <div class="col-md-3 fw-semibold text-success">Gaji Bersih</div>
             <div class="col-md-9">
               <input type="text" id="jumlah_bersih" readonly class="form-control border-0 border-bottom bg-light-subtle text-end">
-            </div>
-          </div>
-
-          @foreach($komponen as $item)
-            @if($item->tipe == 'potongan' && $item->kategori == 'lainnya')
-              <div class="row mb-3">
-                <div class="col-md-3 fw-semibold">{{ $item->nama_komponen }}</div>
-                <div class="col-md-9">
-                  <div class="input-group">
-                    <input type="number" step="any" class="form-control border-0 border-bottom bg-light-subtle text-end hitung-total"
-                          name="nominal[{{ $item->id_komponen }}]" placeholder="0">
-                    <span class="input-group-text bg-light-subtle border-0 border-bottom">Rp</span>
-                  </div>
-                </div>
-              </div>
-            @endif
-          @endforeach
-
-          {{-- Total Potongan --}}
-          <div class="row mt-4">
-            <div class="col-md-3 fw-semibold text-danger">Total Potongan</div>
-            <div class="col-md-9">
-              <input type="text" id="total_potongan" readonly class="form-control border-0 border-bottom bg-light-subtle text-end">
-            </div>
-          </div>
-
-          {{-- Gaji Diterima --}}
-          <div class="row mt-3">
-            <div class="col-md-3 fw-semibold text-primary">Gaji Diterima</div>
-            <div class="col-md-9">
-              <input type="text" id="gaji_diterima" readonly class="form-control border-0 border-bottom bg-light-subtle text-end">
             </div>
           </div>
         </div>
@@ -160,6 +118,7 @@
 
       {{-- TOMBOL SIMPAN --}}
       <div class="text-center mt-5 mb-4">
+        <a href="{{ route('slipgaji.index') }}" class="btn btn-dark px-5 py-2 fw-semibold shadow-sm">Batal</a>
         <button type="submit" class="btn btn-dark px-5 py-2 fw-semibold shadow-sm">Simpan</button>
       </div>
     </form>
@@ -206,15 +165,6 @@
 
         const gajiBersih = totalKotor - totalPotongan;
         document.getElementById('jumlah_bersih').value = formatRupiah(gajiBersih);
-
-        let potonganLain = 0;
-        document.querySelectorAll('.hitung-total').forEach(el => {
-          potonganLain += Number(el.value) || 0;
-        });
-        document.getElementById('total_potongan').value = formatRupiah(potonganLain);
-
-        const gajiDiterima = gajiBersih - potonganLain;
-        document.getElementById('gaji_diterima').value = formatRupiah(gajiDiterima);
       }
 
       document.addEventListener('input', e => {

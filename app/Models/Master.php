@@ -8,7 +8,7 @@ class Master extends Model
 {
     protected $table  = 'masterkomponen';
     protected $primaryKey = 'id_komponen';
-    protected $fillable = ['nama_komponen', 'tipe', 'kategori'];
+    protected $fillable = ['nama_komponen', 'tipe', 'kategori', 'periode'];
 
     public function penghasilan()
         {

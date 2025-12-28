@@ -6,6 +6,7 @@
     use App\Models\User;
     use Maatwebsite\Excel\Facades\Excel;
     use App\Imports\PegawaiImport;
+    use Yajra\DataTables\Facades\DataTables;
     use Illuminate\Http\Request;
     use Illuminate\Support\Facades\Hash;
 
@@ -120,6 +121,37 @@
             Excel::import(new PegawaiImport, $request->file('file'));
 
             return redirect()->route('pegawai.index')->with('success', 'Data pegawai berhasil diimport!');
+        }
+
+        public function data()
+{
+    return DataTables::of(Pegawai::query())
+        ->addIndexColumn()
+
+        ->addColumn('aksi', function ($row) {
+            return '
+              <a href="'.route('pegawai.edit', $row->nip_pegawai).'" 
+                 class="btn btn-sm btn-warning">
+                 <i class="bi bi-pencil-square"></i>
+              </a>
+              <form action="'.route('pegawai.destroy', $row->nip_pegawai).'" 
+                    method="POST" style="display:inline">
+                  '.csrf_field().method_field('DELETE').'
+                  <button class="btn btn-sm btn-danger"
+                          onclick="return confirm(\'Yakin hapus data ini?\')">
+                      <i class="bi bi-trash"></i>
+                  </button>
+              </form>
+            ';
+        })
+
+        ->addColumn('checkbox', function () {
+            return '<input type="checkbox" class="checkItem">';
+        })
+
+        ->rawColumns(['aksi', 'checkbox'])
+        ->make(true);
 }
+
         }
     

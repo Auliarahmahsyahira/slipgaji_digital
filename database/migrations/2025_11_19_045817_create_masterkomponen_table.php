@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id('id_komponen');
             $table->string('nama_komponen', 100);
             $table->enum('tipe', ['penghasilan', 'potongan']);
+            $table->enum('periode', ['24', '1']);
             $table->enum('kategori', ['wajib', 'lainnya'])->nullable();
             $table->timestamps();
         });
@@ -22,7 +23,7 @@ return new class extends Migration
 
     /**
      * Reverse the migrations.
-     */
+     */                                              
     public function down(): void
     {
         Schema::dropIfExists('masterkomponen');

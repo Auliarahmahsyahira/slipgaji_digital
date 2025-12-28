@@ -3,12 +3,12 @@
 @section('content')
 
   <div class="text-center mb-5">
-    <h4 class="fw-bold text-dark text-shadow-sm">Edit Slip Gaji Pegawai</h4>
+    <h4 class="fw-bold text-dark text-shadow-sm">Edit Slip Gaji Bulanan Pegawai</h4>
   </div>
 
-  <form action="{{ route('slipgaji.update2', $gaji->id_gaji) }}" method="POST">
-    @csrf
+  <form action="{{ route('slipgaji.update2', $gaji->id) }}" method="POST">
     @method('PUT')
+    @csrf
 
     {{-- IDENTITAS PEGAWAI --}}
     <div class="card shadow-sm mb-4 border-0 w-75 mx-auto bg-body-tertiary">
@@ -17,8 +17,7 @@
         <div class="row mb-3">
           <div class="col-md-3 fw-semibold">Periode</div>
           <div class="col-md-9">
-            <input type="month" name="periode" class="form-control border-0 border-bottom bg-light-subtle"
-              value="{{ \Carbon\Carbon::parse($gaji->periode)->format('Y-m') }}" required>
+            <input type="text" name="periode" class="form-control border-0 border-bottom bg-light-subtle" value="{{ $gaji->periode }}" required>
           </div>
         </div>
 
@@ -32,6 +31,7 @@
       </div>
     </div>
 
+
     {{-- POTONGAN LAINNYA --}}
     <div class="card shadow-sm mb-4 border-0 w-75 mx-auto bg-body-tertiary">
       <div class="card-header fw-semibold bg-white border-0 text-secondary">Potongan Bulanan</div>
@@ -43,15 +43,15 @@
           <div class="col-md-9">
             <input type="text" id="jumlah_bersih_tampil" readonly
               class="form-control border-0 border-bottom bg-light-subtle text-end"
-              value="{{ number_format($gaji->jumlah_bersih, 0, ',', '.') }}">
-            <input type="hidden" name="jumlah_bersih" id="jumlah_bersih" value="{{ $gaji->jumlah_bersih }}">
+              value="{{ number_format($gaji->gaji->jumlah_bersih, 0, ',', '.') }}">
+            <input type="hidden" name="jumlah_bersih" id="jumlah_bersih" value="{{ $gaji->gaji->jumlah_bersih }}">
           </div>
         </div>
 
         @foreach($komponen as $item)
           @if($item->tipe == 'potongan' && $item->kategori == 'lainnya')
             @php
-              $nilai = ($gaji->potongan ?? collect())->where('id_komponen', $item->id_komponen)->first()->nominal ?? 0;
+              $nilai = ($gaji->potonganB ?? collect())->where('id_komponen', $item->id_komponen)->first()->nominal ?? 0;
             @endphp
             <div class="row mb-3">
               <div class="col-md-3 fw-semibold">{{ $item->nama_komponen }}</div>
@@ -98,44 +98,37 @@
   </form>
 
   <script>
-    // Auto isi nama dari NIP
-    document.getElementById('nip_pegawai').addEventListener('change', function() {
-      const nip = this.value.trim();
-      const namaInput = document.getElementById('nama');
-      if (nip !== '') {
-        fetch(`{{ url('/cek-nip') }}/${nip}`)
-          .then(res => res.json())
-          .then(data => {
-            if (data.success) namaInput.value = data.nama;
-            else {
-              namaInput.value = '';
-              alert(data.message);
-            }
-          });
-      }
+  function hitungGaji() {
+    // ambil jumlah bersih dari hidden input
+    const jumlahBersih = Number(document.getElementById('jumlah_bersih').value) || 0;
+
+    // hitung total potongan
+    let totalPotongan = 0;
+    document.querySelectorAll('.hitung-total').forEach(el => {
+      totalPotongan += Number(el.value) || 0;
     });
 
-    // Hitung otomatis
-    function hitungGaji() {
-      const gajiBersih = totalKotor - totalPotongan;
-      document.getElementById('jumlah_bersih_tampil').value = gajiBersih.toLocaleString('id-ID');
-      document.getElementById('jumlah_bersih').value = gajiBersih;
+    // tampilkan total potongan
+    document.getElementById('total_potongan_tampil').value =
+      totalPotongan.toLocaleString('id-ID');
+    document.getElementById('total_potongan').value = totalPotongan;
 
-      let potonganLain = 0;
-      document.querySelectorAll('.hitung-total').forEach(el => potonganLain += Number(el.value) || 0);
-      document.getElementById('total_potongan_tampil').value = potonganLain.toLocaleString('id-ID');
-      document.getElementById('total_potongan').value = potonganLain;
+    // hitung gaji diterima
+    const gajiDiterima = jumlahBersih - totalPotongan;
 
-      const gajiDiterima = gajiBersih - potonganLain;
-      document.getElementById('gaji_diterima_tampil').value = gajiDiterima.toLocaleString('id-ID');
-      document.getElementById('gaji_diterima').value = gajiDiterima;
-    }
+    document.getElementById('gaji_diterima_tampil').value =
+      gajiDiterima.toLocaleString('id-ID');
+    document.getElementById('gaji_diterima').value = gajiDiterima;
+  }
 
-    document.addEventListener('input', e => {
-      if (e.target.classList.contains('hitung-kotor') || e.target.classList.contains('hitung-potongan') || e.target.classList.contains('hitung-total')) {
-        hitungGaji();
-      }
-    });
-  </script>
+  // jalankan saat input potongan berubah
+  document.querySelectorAll('.hitung-total').forEach(el => {
+    el.addEventListener('input', hitungGaji);
+  });
+
+  // hitung saat halaman pertama kali dibuka
+  document.addEventListener('DOMContentLoaded', hitungGaji);
+</script>
+
 
 @endsection

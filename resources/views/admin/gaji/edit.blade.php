@@ -17,8 +17,7 @@
         <div class="row mb-3">
           <div class="col-md-3 fw-semibold">Periode</div>
           <div class="col-md-9">
-            <input type="month" name="periode" class="form-control border-0 border-bottom bg-light-subtle"
-              value="{{ \Carbon\Carbon::parse($gaji->periode)->format('Y-m') }}" required>
+            <input type="text" name="periode" class="form-control border-0 border-bottom bg-light-subtle" value="{{ $gaji->periode }}" required>
           </div>
         </div>
 
@@ -31,6 +30,7 @@
         </div>
       </div>
     </div>
+</div>
 
     {{-- PENGHASILAN --}}
     <div class="card shadow-sm mb-4 border-0 w-75 mx-auto bg-body-tertiary">
@@ -113,17 +113,9 @@
             <input type="hidden" name="jumlah_potongan" id="jumlah_potongan" value="{{ $gaji->jumlah_potongan }}">
           </div>
         </div>
-      </div>
-    </div>
-
-    {{-- POTONGAN LAINNYA --}}
-    <div class="card shadow-sm mb-4 border-0 w-75 mx-auto bg-body-tertiary">
-      <div class="card-header fw-semibold bg-white border-0 text-secondary">Potongan Lainnya</div>
-      <div class="card-body bg-white rounded">
-
-        {{-- Gaji Bersih --}}
-        <div class="row mb-3">
-          <div class="col-md-3 fw-semibold text-success">Gaji Bersih</div>
+      
+      <div class="row mb-3">
+          <div class="col-md-3 fw-semibold text-danger">Gaji Bersih</div>
           <div class="col-md-9">
             <input type="text" id="jumlah_bersih_tampil" readonly
               class="form-control border-0 border-bottom bg-light-subtle text-end"
@@ -131,6 +123,8 @@
             <input type="hidden" name="jumlah_bersih" id="jumlah_bersih" value="{{ $gaji->jumlah_bersih }}">
           </div>
         </div>
+      </div>
+</div>
 
     {{-- TOMBOL UPDATE --}}
     <div class="text-center mt-5 mb-4">
@@ -140,45 +134,42 @@
   </form>
 
   <script>
-    // Auto isi nama dari NIP
-    document.getElementById('nip_pegawai').addEventListener('change', function() {
-      const nip = this.value.trim();
-      const namaInput = document.getElementById('nama');
-      if (nip !== '') {
-        fetch(`{{ url('/cek-nip') }}/${nip}`)
-          .then(res => res.json())
-          .then(data => {
-            if (data.success) namaInput.value = data.nama;
-            else {
-              namaInput.value = '';
-              alert(data.message);
-            }
-          });
-      }
+  function hitungGaji() {
+    let totalKotor = 0;
+    document.querySelectorAll('.hitung-kotor').forEach(el => {
+      totalKotor += Number(el.value) || 0;
     });
 
-    // Hitung otomatis
-    function hitungGaji() {
-      let totalKotor = 0;
-      document.querySelectorAll('.hitung-kotor').forEach(el => totalKotor += Number(el.value) || 0);
-      document.getElementById('jumlah_kotor_tampil').value = totalKotor.toLocaleString('id-ID');
-      document.getElementById('jumlah_kotor').value = totalKotor;
+    let totalPotongan = 0;
+    document.querySelectorAll('.hitung-potongan').forEach(el => {
+      totalPotongan += Number(el.value) || 0;
+    });
 
-      let totalPotongan = 0;
-      document.querySelectorAll('.hitung-potongan').forEach(el => totalPotongan += Number(el.value) || 0);
-      document.getElementById('jumlah_potongan_tampil').value = totalPotongan.toLocaleString('id-ID');
-      document.getElementById('jumlah_potongan').value = totalPotongan;
+    const gajiBersih = totalKotor - totalPotongan;
 
-      const gajiBersih = totalKotor - totalPotongan;
-      document.getElementById('jumlah_bersih_tampil').value = gajiBersih.toLocaleString('id-ID');
-      document.getElementById('jumlah_bersih').value = gajiBersih;
+    document.getElementById('jumlah_kotor_tampil').value =
+      totalKotor.toLocaleString('id-ID');
+    document.getElementById('jumlah_kotor').value = totalKotor;
+
+    document.getElementById('jumlah_potongan_tampil').value =
+      totalPotongan.toLocaleString('id-ID');
+    document.getElementById('jumlah_potongan').value = totalPotongan;
+
+    document.getElementById('jumlah_bersih_tampil').value =
+      gajiBersih.toLocaleString('id-ID');
+    document.getElementById('jumlah_bersih').value = gajiBersih;
+  }
+
+  // 🔥 EVENT LISTENER YANG BENAR
+  document.addEventListener('input', function (e) {
+    if (e.target.matches('input[type="number"]')) {
+      hitungGaji();
     }
+  });
 
-    document.addEventListener('input', e => {
-      if (e.target.classList.contains('hitung-kotor') || e.target.classList.contains('hitung-potongan') || e.target.classList.contains('hitung-total')) {
-        hitungGaji();
-      }
-    });
-  </script>
+  // Hitung sekali saat halaman edit dibuka
+  document.addEventListener('DOMContentLoaded', hitungGaji);
+</script>
+
 
 @endsection

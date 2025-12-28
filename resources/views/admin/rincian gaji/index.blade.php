@@ -38,6 +38,7 @@
           <th>Nama Komponen</th>
           <th>Tipe</th>
           <th>Kategori</th>
+          <th>Periode</th>
           <th>Aksi</th>
         </tr>
       </thead>
@@ -58,6 +59,13 @@
               <span class="badge bg-primary">Wajib</span>
             @else
               <span class="badge bg-secondary">Lainnya</span>
+            @endif
+          </td>
+          <td>
+            @if($item->periode == '24')
+              <span class="badge bg-warning">2 Tahun</span>
+            @else
+              <span class="badge bg-info">Bulanan</span>
             @endif
           </td>
           <td>

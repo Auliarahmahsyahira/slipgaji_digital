@@ -34,7 +34,7 @@ class PegawaiImport implements ToModel, WithHeadingRow
         User::firstOrCreate(
             ['nip_pegawai' => $row['nip']], // foreign key → pegawai
             [
-                'password' => Hash::make('KEMENAGKEPRI2026'), // default password
+                'password' => Hash::make('KANWILKEMENAGKEPRI'), // default password
                 'role'     => 'pegawai',
             ]
         );

@@ -68,6 +68,12 @@
   <div class="login-box">
     <img src="{{ asset('image/logokemanag.png') }}" alt="Logo Kemenag" class="logo-kemenag">
     <h2>SLIP GAJI PEGAWAI<br>KANWIL KEMENAG PROV. KEPRI</h2>
+    @if (session('success'))
+      <div class="alert alert-success text-center py-2 mb-3">
+          {{ session('success') }}
+      </div>
+    @endif
+
 
     <form method="POST" action="{{ route('login.post') }}">
       @csrf

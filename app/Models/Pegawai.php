@@ -23,4 +23,8 @@ class Pegawai extends Model
     public function gaji() {
         return $this->hasMany(Gaji::class, 'nip_pegawai', 'nip_pegawai');
     }
+
+    public function gajib() {
+        return $this->hasMany(GajiB::class, 'nip_pegawai', 'nip_pegawai');
+    }
 }

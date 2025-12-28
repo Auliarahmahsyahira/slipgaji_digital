@@ -29,12 +29,14 @@ class KomponenController extends Controller
             'nama_komponen' => 'required|string|max:100',
             'tipe' => 'required|in:penghasilan,potongan',
             'kategori' => 'required|in:wajib,lainnya',
+            'periode' => 'required|in:24,1',
         ]);
 
         Master::create([
             'nama_komponen' => $request->nama_komponen,
             'tipe' => $request->tipe,
             'kategori' => $request->kategori,
+            'periode' => $request->periode,
         ]);
 
         return redirect()->route('komponen.index')->with('success', 'Komponen gaji berhasil ditambahkan!');
@@ -52,6 +54,7 @@ class KomponenController extends Controller
             'nama_komponen' => 'required|string|max:100',
             'tipe' => 'required|in:penghasilan,potongan',
             'kategori' => 'required|in:wajib,lainnya',
+            'periode' => 'required|in:24,1',
         ]);
 
         $komponen = Master::findOrFail($id);
@@ -59,6 +62,7 @@ class KomponenController extends Controller
             'nama_komponen' => $request->nama_komponen,
             'tipe' => $request->tipe,
             'kategori' => $request->kategori,
+            'periode' => $request->periode,
         ]);
 
         return redirect()->route('komponen.index')->with('success', 'Data berhasil diperbarui!');

@@ -1,86 +1,58 @@
 @extends('layouts.admin')
 
 @section('content')
-  <h4 class="text-center fw-bold mb-4 text-dark">
-    Daftar Pegawai Kanwil Kemenag Prov. Kepri
-  </h4>
 
-   {{-- Baris atas: Create di kiri, Search di kanan --}}
-  <div class="d-flex justify-content-between align-items-center mb-3" style="font-family: 'Times New Roman', Times, serif;">
-    
-    {{-- Tombol Create di kiri --}}
-    <div class="d-flex gap-2">
-    {{-- Tombol Create di kiri --}}
-    <a href="{{ route('pegawai.create') }}" class="btn btn-success px-4" style="background-color: #006316;">Create</a>
+<h4 class="text-center fw-bold mb-4 text-dark">
+  Daftar Pegawai Kanwil Kemenag Prov. Kepri
+</h4>
 
-    {{-- Tombol Import --}}
-    <button class="btn btn-success px-4" style="background-color: #006316;" data-bs-toggle="modal" data-bs-target="#modalImport">Import</button>
+{{-- Tombol atas --}}
+<div class="d-flex justify-content-between align-items-center mb-3"
+     style="font-family: 'Times New Roman', Times, serif;">
+  <div class="d-flex gap-2">
+    <a href="{{ route('pegawai.create') }}"
+       class="btn btn-success px-4"
+       style="background-color: #006316;">
+      Create
+    </a>
+
+    <button class="btn btn-success px-4"
+            style="background-color: #006316;"
+            data-bs-toggle="modal"
+            data-bs-target="#modalImport">
+      Import
+    </button>
   </div>
-
-    {{-- Pencarian di kanan --}}
-    <form method="GET" action="{{ route('pegawai.index') }}" class="input-group w-auto">
-      <span class="input-group-text bg-light border-end-0 d-flex align-items-center justify-content-center" style="height: 35px;">
-        <i class="bi bi-search"></i>
-      </span>
-      <input 
-        type="text" 
-        name="search" 
-        class="form-control border-start-0" style="width: 180px; height: 35px;"
-        placeholder="Cari NIP..."
-        value="{{ request('search') }}"
-      >
-    </form>
-  </div>
-
-  {{-- Tabel Pegawai --}}
-<div style="overflow-x: auto; overflow-y: auto; max-height: 500px; white-space: nowrap;">
-  <table class="table table-bordered table-striped align-middle text-center bg-white shadow-sm" style="min-width: 900px;">
-    <thead class="table-dark">
-      <tr>
-        <th style="width: 110px;"></th>
-        <th><input type="checkbox" id="checkAll"></th>
-        <th>No</th>
-        <th>NIP</th>
-        <th>Nama</th>
-        <th>Kdsatker</th>
-        <th>Jabatan</th>
-        <th>No Rekening BSI</th>
-        <th>Golongan</th>
-        <th>Nama Golongan</th>
-      </tr>
-    </thead>
-    <tbody>
-      @foreach($pegawai as $p)
-      <tr>
-        <td>
-          <div class="d-flex justify-content-center align-items-center gap-2">
-            <a href="{{ route('pegawai.edit', $p->nip_pegawai) }}" class="btn btn-sm btn-warning d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-              <i class="bi bi-pencil-square"></i>
-            </a>
-            <form action="{{ route('pegawai.destroy', $p->nip_pegawai) }}" method="POST" class="d-inline">
-              @csrf
-              @method('DELETE')
-              <button type="submit" class="btn btn-sm btn-danger d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" onclick="return confirm('Yakin hapus data ini?')">
-                <i class="bi bi-trash"></i>
-              </button>
-            </form>
-          </div>
-        </td>
-        <td><input type="checkbox" class="checkItem" value="{{ $p->nip_pegawai }}"></td>
-        <td>{{ $loop->iteration }}</td>
-        <td>{{ $p->nip_pegawai }}</td>
-        <td>{{ $p->nama }}</td>
-        <td>{{ $p->kdsatker }}</td>
-        <td>{{ $p->jabatan }}</td>
-        <td>{{ $p->no_rekening }}</td>
-        <td>{{ $p->golongan }}</td>
-        <td>{{ $p->nama_golongan }}</td>
-      </tr>
-      @endforeach
-    </tbody>
-  </table>
 </div>
 
+{{-- CARD --}}
+<div class="card shadow-sm">
+  <div class="card-body">
+
+    <div style="overflow-x:auto; max-height:500px;">
+      <table id="tabelPegawai"
+             class="table table-bordered table-striped align-middle text-center bg-white">
+        <thead class="table-dark">
+          <tr>
+            <th style="width:110px;">Aksi</th>
+            <th><input type="checkbox" id="checkAll"></th>
+            <th>No</th>
+            <th>NIP</th>
+            <th>Nama</th>
+            <th>Kdsatker</th>
+            <th>Jabatan</th>
+            <th>No Rekening BSI</th>
+            <th>Golongan</th>
+            <th>Nama Golongan</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
 
 {{-- Script untuk checkbox pilih semua --}}
 <script>
@@ -112,5 +84,81 @@
     </form>
   </div>
 </div>
+
+<script>
+$(function () {
+    let table = $('#tabelPegawai').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: "{{ route('pegawai.data') }}",
+        scrollX: true,
+
+        dom: 'lfrtip',
+        paging: true,
+        pagingType: 'simple_numbers',
+        pageLength: 10,
+        lengthMenu: [10, 25, 50, 100],
+
+        columns: [
+            { data: 'aksi', orderable: false, searchable: false },
+            { data: 'checkbox', orderable: false, searchable: false },
+            { data: 'DT_RowIndex', orderable: false, searchable: false },
+            { data: 'nip_pegawai' },
+            { data: 'nama' },
+            { data: 'kdsatker' },
+            { data: 'jabatan' },
+            { data: 'no_rekening' },
+            { data: 'golongan' },
+            { data: 'nama_golongan' }
+        ],
+
+        language: {
+            url: "https://cdn.datatables.net/plug-ins/1.13.8/i18n/id.json"
+        }
+    });
+
+    $('#checkAll').on('change', function () {
+        $('.checkItem').prop('checked', this.checked);
+    });
+});
+</script>
+
+<style>
+/* Paksa DataTables control muncul */
+.dataTables_length,
+.dataTables_filter,
+.dataTables_info,
+.dataTables_paginate {
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* Rapikan posisi */
+.dataTables_length {
+    float: left;
+}
+
+.dataTables_filter {
+    float: right;
+    text-align: right;
+}
+
+.dataTables_paginate {
+    float: right;
+}
+
+.dataTables_info {
+    float: left;
+}
+
+/* Biar tidak ketutup card */
+.dataTables_wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+</style>
+
+
+
 
 @endsection

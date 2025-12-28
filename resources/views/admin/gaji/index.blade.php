@@ -8,34 +8,15 @@
   </h3>
 </div>
 
-<div class="position-relative mb-4" style="min-height: 100px;">
-  <a href="{{ route('slipgaji.create') }}" class="btn btn-dark position-absolute" style="top: 0; left: 60px; background-color: #006316;">Create</a>
-
-  <form id="form-selected" action="{{ route('slipgaji.deleteSelected') }}" method="POST" class="position-absolute" style="top: 45px; left: 110px;">
-    @csrf
-    @method('DELETE')
-    <button type="submit" class="btn btn-dark" style="background-color: #006316;" onclick="return confirm('Yakin mau hapus data terpilih?')">Delete</button>
-  </form>
-
-  <form id="form-edit" action="{{ route('slipgaji.editSelected') }}" method="GET" class="position-absolute" style="top: 0; left: 160px;">
-  @csrf
-  <button type="submit" class="btn btn-dark" style="background-color: #006316;">Update</button>
-</form>
-</div>
-
-
 <div class="d-flex justify-content-between align-items-center mb-3 px-4">
     
-    <!-- Tombol Import Atas -->
+    <!-- Tombol Import tahun -->
     <div>
-        <form action="{{ route('gaji.import.tetap') }}" method="POST" enctype="multipart/form-data">
-            @csrf
-            <input type="file" name="file" accept=".xlsx,.xls" required onchange="this.form.submit()" id="importTetap" style="display:none;">
-            <label for="importTetap" class="btn btn-import">Import</label>
-        </form>
+        <button class="btn btn-success px-4" style="background-color: #006316;" data-bs-toggle="modal" data-bs-target="#modalImporttahun">Import</button>
     </div>
 
     <!-- SEARCH -->
+     <div class="d-flex align-items-center gap-2">
     <form action="{{ route('slipgaji.index')}}" method="GET" style="width:260px;">
     <div class="input-group search-group">
         <span class="input-group-text"><i class="bi bi-search"></i></span>
@@ -49,13 +30,22 @@
     </div>
 </form>
 
+<!-- CREATE ICON -->
+        <button class="btn btn-success btn-icon"
+                title="Tambah Slip Gaji"
+                data-bs-toggle="modal"
+                data-bs-target="#modalCreate">
+            <i class="bi bi-plus-lg"></i>
+        </button>
+    </div>
 </div>
+
 
 <div class="table-responsive mb-4" style="max-height: 400px; overflow-y: auto; margin-top:40px;">
   <table class="table table-bordered bg-white text-center align-middle">
     <thead class="table-light" style="font-family: 'Times New Roman', Times, serif;">
       <tr>
-        <th><input type="checkbox" id="select-all"></th>
+        <th>Aksi</th>
         <th>No</th>
         <th>Periode</th>
         <th>Nama</th>
@@ -88,37 +78,37 @@
       </tr>
     </thead>
     <tbody>
-      @forelse ($gaji as $index => $item)
+      @forelse ($gajiWajib as $index => $item)
       @php
-        $tunjIstri      = $item->penghasilan->where('id_komponen', 1)->sum('nominal');
-        $tunjAnak       = $item->penghasilan->where('id_komponen', 2)->sum('nominal');
-        $tunjUmum       = $item->penghasilan->where('id_komponen', 3)->sum('nominal');
-        $tunjTaUmum     = $item->penghasilan->where('id_komponen', 4)->sum('nominal');
-        $tunjPapua      = $item->penghasilan->where('id_komponen', 5)->sum('nominal');
-        $tunjTerpencil  = $item->penghasilan->where('id_komponen', 6)->sum('nominal');
-        $tunjStruktur   = $item->penghasilan->where('id_komponen', 7)->sum('nominal');
-        $tunjFungsi     = $item->penghasilan->where('id_komponen', 8)->sum('nominal');
-        $tunjLain       = $item->penghasilan->where('id_komponen', 9)->sum('nominal');
-        $tunjBulat      = $item->penghasilan->where('id_komponen', 10)->sum('nominal');
-        $tunjBeras      = $item->penghasilan->where('id_komponen', 11)->sum('nominal');
-        $tunjPajak      = $item->penghasilan->where('id_komponen', 12)->sum('nominal');
+        $tunjIstri      = $item->penghasilan->where('id_komponen', 29)->sum('nominal');
+        $tunjAnak       = $item->penghasilan->where('id_komponen', 30)->sum('nominal');
+        $tunjUmum       = $item->penghasilan->where('id_komponen', 31)->sum('nominal');
+        $tunjTaUmum     = $item->penghasilan->where('id_komponen', 32)->sum('nominal');
+        $tunjPapua      = $item->penghasilan->where('id_komponen', 33)->sum('nominal');
+        $tunjTerpencil  = $item->penghasilan->where('id_komponen', 34)->sum('nominal');
+        $tunjStruktur   = $item->penghasilan->where('id_komponen', 35)->sum('nominal');
+        $tunjFungsi     = $item->penghasilan->where('id_komponen', 36)->sum('nominal');
+        $tunjLain       = $item->penghasilan->where('id_komponen', 37)->sum('nominal');
+        $tunjBulat      = $item->penghasilan->where('id_komponen', 38)->sum('nominal');
+        $tunjBeras      = $item->penghasilan->where('id_komponen', 39)->sum('nominal');
+        $tunjPajak      = $item->penghasilan->where('id_komponen', 40)->sum('nominal');
 
-        $potBeras       = $item->potongan->where('id_komponen', 13)->sum('nominal');
-        $IWP            = $item->potongan->where('id_komponen', 38)->sum('nominal');
-        $BPJS           = $item->potongan->where('id_komponen', 15)->sum('nominal');
-        $BPJSlain       = $item->potongan->where('id_komponen', 16)->sum('nominal');
-        $PotPph         = $item->potongan->where('id_komponen', 17)->sum('nominal');
-        $SewaRmh        = $item->potongan->where('id_komponen', 18)->sum('nominal');
-        $Tunggakan      = $item->potongan->where('id_komponen', 19)->sum('nominal');
-        $Utang          = $item->potongan->where('id_komponen', 20)->sum('nominal');
-        $PotLain        = $item->potongan->where('id_komponen', 21)->sum('nominal');
-        $Taperum        = $item->potongan->where('id_komponen', 22)->sum('nominal');
+        $potBeras       = $item->potongan->where('id_komponen', 41)->sum('nominal');
+        $IWP            = $item->potongan->where('id_komponen', 42)->sum('nominal');
+        $BPJS           = $item->potongan->where('id_komponen', 43)->sum('nominal');
+        $BPJSlain       = $item->potongan->where('id_komponen', 44)->sum('nominal');
+        $PotPph         = $item->potongan->where('id_komponen', 45)->sum('nominal');
+        $SewaRmh        = $item->potongan->where('id_komponen', 46)->sum('nominal');
+        $Tunggakan      = $item->potongan->where('id_komponen', 47)->sum('nominal');
+        $Utang          = $item->potongan->where('id_komponen', 48)->sum('nominal');
+        $PotLain        = $item->potongan->where('id_komponen', 49)->sum('nominal');
+        $Taperum        = $item->potongan->where('id_komponen', 50)->sum('nominal');
       @endphp
 
         <tr>
-          <td><input type="checkbox" name="ids[]" form="form-selected" value="{{ $item->id_gaji }}"></td>
+          <td><a href="{{ route('slipgaji.edit', $item->id_gaji) }}" class="btn btn-sm btn-warning" title="Edit Slip Gaji"> <i class="bi bi-pencil-square"></i></a></td>
           <td>{{ $index + 1 }}</td>
-          <td>{{ \Carbon\Carbon::parse($item->periode)->translatedFormat('F Y') }}</td>
+          <td>{{ $item->periode }}</td>
           <td>{{ $item->pegawai->nama ?? '-' }}</td>
           <td>{{ number_format($item->gaji_pokok, 0, ',', '.') }}</td>
           <td>{{ number_format($tunjIstri, 0, ',', '.') }}</td>
@@ -148,27 +138,22 @@
           <td>{{ number_format($item->jumlah_bersih, 0, ',', '.') }}</td>
         </tr>
       @empty
-        <tr><td colspan="12">Data belum tersedia</td></tr>
+        <tr><td colspan="30">Data belum tersedia</td></tr>
       @endforelse
     </tbody>
-  </table>
+</table>
 </div>
 </div>
 
  <div class="mb-3 px-4 text-start">
-    <form action="{{ route('gaji.import.bulanan') }}" method="POST" enctype="multipart/form-data">
-        @csrf
-        <input type="file" name="file" accept=".xlsx,.xls" required onchange="this.form.submit()" id="importBulanan" style="display:none;">
-        <label for="importBulanan" class="btn btn-import">Import</label>
-    </form>
+    <button class="btn btn-success px-4" style="background-color: #006316;" data-bs-toggle="modal" data-bs-target="#modalImportBulanan">Import</button>
 </div>
-
 
 <div class="table-responsive" style="max-height: 400px; overflow-y: auto; margin-top: 40px;">
   <table class="table table-bordered bg-white text-center align-middle">
     <thead class="table-light" style="font-family: 'Times New Roman', Times, serif;">
       <tr>
-        <th><input type="checkbox" id="select-all"></th>
+        <th>Aksi</th>
         <th>No</th>
         <th>Periode</th>
         <th>Nama</th>
@@ -193,32 +178,41 @@
       </tr>
     </thead>
     <tbody>
-      @forelse ($gaji as $index => $item)
+      @forelse ($gajiBulanan as $index => $item)
       @php
+
+          $pot = $item->potonganB ?? collect();
           // DETAIL POTONGAN
-          $bankRiau       = $item->potongan->where('id_komponen', 21)->sum('nominal');
-          $bankSyariah    = $item->potongan->where('id_komponen', 22)->sum('nominal');
-          $bankBTN        = $item->potongan->where('id_komponen', 23)->sum('nominal');
-          $koperasiKanwil = $item->potongan->where('id_komponen', 24)->sum('nominal');
-          $koperasiBintan = $item->potongan->where('id_komponen', 25)->sum('nominal');
-          $zakat          = $item->potongan->where('id_komponen', 26)->sum('nominal');
-          $infak          = $item->potongan->where('id_komponen', 27)->sum('nominal');
-          $donaturMasjid  = $item->potongan->where('id_komponen', 28)->sum('nominal');
-          $bprBintan      = $item->potongan->where('id_komponen', 29)->sum('nominal');
-          $qurban         = $item->potongan->where('id_komponen', 30)->sum('nominal');
-          $wakafUang      = $item->potongan->where('id_komponen', 31)->sum('nominal');
-          $dharmaWanita   = $item->potongan->where('id_komponen', 32)->sum('nominal');
-          $dansos         = $item->potongan->where('id_komponen', 33)->sum('nominal');
-          $bpjs1          = $item->potongan->where('id_komponen', 34)->sum('nominal');
-          $lainLain       = $item->potongan->where('id_komponen', 35)->sum('nominal');
+          $bankRiau       = $pot->where('id_komponen', 51)->sum('nominal');
+          $bankSyariah    = $pot->where('id_komponen', 52)->sum('nominal');
+          $bankBTN        = $pot->where('id_komponen', 53)->sum('nominal');
+          $koperasiKanwil = $pot->where('id_komponen', 54)->sum('nominal');
+          $koperasiBintan = $pot->where('id_komponen', 55)->sum('nominal');
+          $zakat          = $pot->where('id_komponen', 56)->sum('nominal');
+          $infak          = $pot->where('id_komponen', 57)->sum('nominal');
+          $donaturMasjid  = $pot->where('id_komponen', 58)->sum('nominal');
+          $bprBintan      = $pot->where('id_komponen', 59)->sum('nominal');
+          $qurban         = $pot->where('id_komponen', 60)->sum('nominal');
+          $wakafUang      = $pot->where('id_komponen', 61)->sum('nominal');
+          $dharmaWanita   = $pot->where('id_komponen', 62)->sum('nominal');
+          $dansos         = $pot->where('id_komponen', 63)->sum('nominal');
+          $bpjs1          = $pot->where('id_komponen', 64)->sum('nominal');
+          $lainLain       = $pot->where('id_komponen', 65)->sum('nominal');
         @endphp
 
         <tr>
-          <td><input type="checkbox" name="ids[]" form="form-selected" value="{{ $item->id_gaji }}"></td>
+          <td><a href="{{ route('slipgaji.edit_bulanan', $item->id) }}" class="btn btn-sm btn-warning me-1" title="Edit Slip Bulanan"> <i class="bi bi-pencil-square"></i></a>
+
+          <form action="{{ route('slipgaji.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Yakin mau hapus data ini?')"> 
+            @csrf 
+            @method('DELETE') 
+            <button type="submit" class="btn btn-sm btn-danger" title="Hapus"> <i class="bi bi-trash"></i> </button> 
+          </form>
+          </td>
           <td>{{ $index + 1 }}</td>
-          <td>{{ \Carbon\Carbon::parse($item->periode)->translatedFormat('F Y') }}</td>
+          <td>{{ $item->periode }}</td>
           <td>{{ $item->pegawai->nama ?? '-' }}</td>
-          <td>{{ number_format($item->jumlah_bersih, 0, ',', '.') }}</td>
+          <td>{{ number_format($item->gaji->jumlah_bersih, 0, ',', '.') }}</td>
           <td>{{ number_format($bankRiau, 0, ',', '.') }}</td>
           <td>{{ number_format($bankSyariah, 0, ',', '.') }}</td>
           <td>{{ number_format($bankBTN, 0, ',', '.') }}</td>
@@ -238,11 +232,12 @@
           <td>{{ number_format($item->gaji_diterima, 0, ',', '.') }}</td>
         </tr>
       @empty
-        <tr><td colspan="12">Data belum tersedia</td></tr>
+        <tr><td colspan="22">Data belum tersedia</td></tr>
       @endforelse
     </tbody>
   </table>
 </div>
+
 
 <script>
   document.getElementById('select-all').addEventListener('change', function(e) {
@@ -257,23 +252,157 @@
     }
   });
 
-  document.getElementById('form-edit').addEventListener('submit', function(e) {
-  const checked = document.querySelectorAll('input[name="ids[]"]:checked');
-  if (checked.length === 0) {
-    e.preventDefault();
-    alert('Pilih satu data yang ingin di-update!');
-  } else if (checked.length > 1) {
-    e.preventDefault();
-    alert('Hanya boleh pilih satu data untuk di-update!');
-  } else {
-    const id = checked[0].value;
-    this.action = '/slipgaji/edit/' + id;
-    this.submit();
-  }
+  document.querySelectorAll('.check-wajib').forEach(cb => {
+  cb.addEventListener('change', () => {
+    if (cb.checked) {
+      document.querySelectorAll('.check-bulanan').forEach(b => b.checked = false);
+      document.getElementById('select-all-bulanan').checked = false;
+    }
+  });
+});
+
+document.getElementById('form-edit').addEventListener('submit', function (e) {
+    const checked = document.querySelectorAll('input[name="ids[]"]:checked');
+
+    if (checked.length === 0) {
+        e.preventDefault();
+        alert('Pilih satu data yang ingin di-update!');
+        return;
+    }
+
+    if (checked.length > 1) {
+        e.preventDefault();
+        alert('Hanya boleh pilih satu data!');
+        return;
+    }
+
+    const mode = checked[0].dataset.mode;
+    document.getElementById('edit-mode').value = mode;
+});
+
+document.querySelectorAll('.check-bulanan').forEach(cb => {
+  cb.addEventListener('change', () => {
+    if (cb.checked) {
+      document.querySelectorAll('.check-wajib').forEach(w => w.checked = false);
+      document.getElementById('select-all-wajib').checked = false;
+    }
+  });
+});
+
+document.querySelectorAll('input[type="checkbox"][name="ids[]"]').forEach(cb => {
+  cb.addEventListener('change', function () {
+    this.closest('tr').classList.toggle('selected', this.checked);
+  });
 });
 </script>
 
+<!-- Modal Import 2 tahun-->
+<div class="modal fade" id="modalImportDuaTahun" tabindex="-1">
+  <div class="modal-dialog">
+    <form method="POST"
+          action="{{ route('slipgaji.store.duatahun') }}"
+          enctype="multipart/form-data"
+          class="modal-content">
+      @csrf
+
+      <div class="modal-header">
+        <h5 class="modal-title">Import Slip Gaji Dua Tahun</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <label class="form-label">Upload File Excel (.xlsx)</label>
+        <input type="file" name="file" class="form-control" required>
+        <small class="text-muted">
+          Format kolom harus sesuai ID komponen master
+        </small>
+      </div>
+
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Import</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Import Bulanan-->
+<div class="modal fade" id="modalImportBulanan" tabindex="-1">
+  <div class="modal-dialog">
+    <form method="POST"
+          action="{{ route('slipgaji.store.bulanan') }}"
+          enctype="multipart/form-data"
+          class="modal-content">
+      @csrf
+
+      <div class="modal-header">
+        <h5 class="modal-title">Import Slip Gaji Bulanan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <label class="form-label">Upload File Excel (.xlsx)</label>
+        <input type="file" name="file" class="form-control" required>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="submit" class="btn btn-primary">Import</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Create -->
+<div class="modal fade" id="modalCreate" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Pilih Jenis Input</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body text-center">
+
+                <p class="mb-4">Silakan pilih jenis input slip gaji:</p>
+
+                <a href="{{ route('slipgaji.create.duatahun') }}"
+                   class="btn btn-success w-100 mb-3"
+                   style="background-color:#006316;">
+                    Input 2 Tahun
+                </a>
+
+                <a href="{{ route('slipgaji.create.bulanan') }}"
+                   class="btn btn-primary w-100"
+                   style="background-color:#0d6efd;">
+                    Input Bulanan
+                </a>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
 <style>
+  tr.selected {
+  background-color: #e8f5e9 !important;
+}
+  .btn-icon {
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+}
+
+.btn-icon i {
+    font-size: 1.1rem;
+}
+
 .btn-import {
     background-color: #006316;
     color: #fff;
