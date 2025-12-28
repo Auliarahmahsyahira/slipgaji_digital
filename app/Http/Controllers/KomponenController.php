@@ -4,75 +4,60 @@ namespace App\Http\Controllers;
 
 use App\Models\Master;
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreKomponenRequest;
+use App\Http\Requests\UpdateKomponenRequest;
 
 class KomponenController extends Controller
 {
-    //
-    public function index(Request $request)
-    {
-         $search = $request->input('search');
-        $komponen = Master::when($search, function ($query, $search) {
-            $query->where('nama_komponen', 'like', "%{$search}%");
-        })->orderBy('created_at', 'desc')->get();
+  public function index(Request $request)
+  {
+    $search = $request->search;
 
-        return view('admin.rincian gaji.index', compact('komponen'));
-    }
+    $komponen = Master::when($search, function ($query, $search) {
+      $query->where('nama_komponen', 'like', "%{$search}%");
+    })
+    ->orderBy('created_at', 'desc')
+    ->get();
 
-    public function create()
-    {
-        return view('admin.rincian gaji.create');
-    }
+    return view('admin.rincian gaji.index', compact('komponen'));
+  }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'nama_komponen' => 'required|string|max:100',
-            'tipe' => 'required|in:penghasilan,potongan',
-            'kategori' => 'required|in:wajib,lainnya',
-            'periode' => 'required|in:24,1',
-        ]);
+  public function create()
+  {
+    return view('admin.rincian gaji.create');
+  }
 
-        Master::create([
-            'nama_komponen' => $request->nama_komponen,
-            'tipe' => $request->tipe,
-            'kategori' => $request->kategori,
-            'periode' => $request->periode,
-        ]);
+  public function store(StoreKomponenRequest $request)
+  {
+    Master::create($request->validated());
 
-        return redirect()->route('komponen.index')->with('success', 'Komponen gaji berhasil ditambahkan!');
-    }
+    return redirect()
+      ->route('komponen.index')
+      ->with('success', 'Komponen gaji berhasil ditambahkan!');
+  }
 
-    public function edit($id)
-    {
-        $komponen = Master::findOrFail($id);
-        return view('admin.rincian gaji.edit', compact('komponen'));
-    }
+  public function edit($id)
+  {
+    $komponen = Master::findOrFail($id);
+    return view('admin.rincian gaji.edit', compact('komponen'));
+  }
 
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'nama_komponen' => 'required|string|max:100',
-            'tipe' => 'required|in:penghasilan,potongan',
-            'kategori' => 'required|in:wajib,lainnya',
-            'periode' => 'required|in:24,1',
-        ]);
+  public function update(UpdateKomponenRequest $request, $id)
+  {
+    $komponen = Master::findOrFail($id);
+    $komponen->update($request->validated());
 
-        $komponen = Master::findOrFail($id);
-        $komponen->update([
-            'nama_komponen' => $request->nama_komponen,
-            'tipe' => $request->tipe,
-            'kategori' => $request->kategori,
-            'periode' => $request->periode,
-        ]);
+    return redirect()
+      ->route('komponen.index')
+      ->with('success', 'Data berhasil diperbarui!');
+  }
 
-        return redirect()->route('komponen.index')->with('success', 'Data berhasil diperbarui!');
-    }
+  public function destroy($id)
+  {
+    Master::findOrFail($id)->delete();
 
-    public function destroy($id)
-    {
-        $komponen = Master::findOrFail($id);
-        $komponen->delete();
-
-        return redirect()->route('komponen.index')->with('success', 'Data berhasil dihapus!');
-    }
+    return redirect()
+      ->route('komponen.index')
+      ->with('success', 'Data berhasil dihapus!');
+  }
 }

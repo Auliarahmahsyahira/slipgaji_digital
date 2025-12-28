@@ -3,6 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreGajiBulananRequest;
+use App\Http\Requests\StoreGajiDuaTahunRequest;
+use App\Http\Requests\UpdateGajiRequest;
+use App\Http\Requests\UpdateGajiBulananRequest;
+use App\Http\Requests\ImportGajiDuaTahunRequest;
+use App\Http\Requests\ImportGajiBulananRequest;
 use Illuminate\Support\Facades\DB;
 use App\Models\Gaji;
 use App\Models\GajiB;
@@ -105,190 +111,119 @@ public function index(Request $request)
     }
 
     // memproses create bulanan
-public function store_bulanan(Request $request)
+public function store_bulanan(StoreGajiBulananRequest $request)
 {
-    /**
-     * 1. NORMALISASI INPUT NOMINAL
-     */
-    $inputNominal = $request->nominal ?? [];
+  $nominal = $request->nominal ?? [];
 
-    foreach ($inputNominal as $key => $value) {
-        // hilangkan format 1.500.000
-        $value = str_replace(['.', ','], '', $value);
+  foreach ($nominal as $k => $v) {
+    $v = str_replace(['.', ','], '', $v);
+    $nominal[$k] = is_numeric($v) ? (float)$v : 0;
+  }
 
-        if ($value === '' || !is_numeric($value)) {
-            $value = 0;
-        }
+  $request->merge(['nominal' => $nominal]);
 
-        $inputNominal[$key] = (float) $value;
+  $slip = Gaji::where('nip_pegawai', $request->nip_pegawai)
+    ->orderBy('periode', 'desc')
+    ->first();
+
+  if (!$slip) {
+    return back()->with('error', 'Data gaji wajib tidak ditemukan!');
+  }
+
+  $totalPotongan = array_sum($nominal);
+  $gajiDiterima  = $slip->jumlah_bersih - $totalPotongan;
+
+  $gajiBulanan = GajiB::create([
+    'nip_pegawai'    => $request->nip_pegawai,
+    'periode'        => $request->periode,
+    'id_gaji'        => $slip->id_gaji,
+    'total_potongan' => $totalPotongan,
+    'gaji_diterima'  => $gajiDiterima,
+  ]);
+
+  foreach ($nominal as $id => $nilai) {
+    if ($nilai > 0) {
+      PotonganB::create([
+        'id_gaji_bulanan' => $gajiBulanan->id,
+        'id_komponen'     => $id,
+        'nominal'         => $nilai,
+      ]);
     }
+  }
 
-    $request->merge(['nominal' => $inputNominal]);
-
-
-    /**
-     * 2. VALIDASI
-     */
-    $request->validate([
-        'nip_pegawai' => 'required',
-        'periode'     => 'required',
-        'nominal'     => 'nullable|array',
-        'nominal.*'   => 'numeric'
-    ]);
-
-    $nip     = $request->nip_pegawai;
-    $periode = $request->periode;
-
-
-    /**
-     * 3. AMBIL GAJI WAJIB TERAKHIR
-     */
-    $slip = Gaji::where('nip_pegawai', $nip)
-                ->orderBy('periode', 'desc')
-                ->first();
-
-    if (!$slip) {
-        return back()->with('error', 'Data gaji wajib tidak ditemukan!');
-    }
-
-
-    /**
-     * 4. HITUNG GAJI BULANAN
-     */
-    $gajiBersih     = $slip->jumlah_bersih;
-    $potongan       = $request->nominal;
-    $totalPotongan  = array_sum($potongan);
-    $gajiDiterima   = $gajiBersih - $totalPotongan;
-
-
-    /**
-     * 5. SIMPAN GAJI BULANAN
-     */
-    $gajiBulanan = GajiB::create([
-        'nip_pegawai'    => $nip,
-        'periode'        => $periode,
-        'id_gaji'        => $slip->id_gaji,
-        'total_potongan' => $totalPotongan,
-        'gaji_diterima'  => $gajiDiterima
-    ]);
-
-
-    /**
-     * 6. SIMPAN DETAIL POTONGAN BULANAN
-     */
-    foreach ($potongan as $idKomponen => $nilai) {
-        if ($nilai > 0) {
-            PotonganB::create([
-                'id_gaji_bulanan'   => $gajiBulanan->id, // FK ke gaji_bulanan
-                'id_komponen'       => $idKomponen,
-                'nominal'           => $nilai
-            ]);
-        }
-    }
-
-
-    return redirect()
-        ->route('slipgaji.index')
-        ->with('success', 'Gaji bulanan berhasil disimpan!');
+  return redirect()
+    ->route('slipgaji.index')
+    ->with('success', 'Gaji bulanan berhasil disimpan!');
 }
 
 
-    public function store_duatahun(Request $request)
+    public function store_duatahun(StoreGajiDuaTahunRequest $request)
 {
-    $inputNominal = $request->nominal ?? [];
+  // 1. Normalisasi nominal
+  $nominal = $request->nominal ?? [];
 
-    foreach ($inputNominal as $key => $value) {
-        // hilangkan format angka Indonesia seperti: 1.500.000 menjadi 1500000
-        $value = str_replace(['.', ','], '', $value);
+  foreach ($nominal as $key => $value) {
+    $value = str_replace(['.', ','], '', $value);
+    $nominal[$key] = is_numeric($value) ? (float)$value : 0;
+  }
 
-        // kalau bukan angka, set ke 0
-        if ($value === '' || !is_numeric($value)) {
-            $value = 0;
-        }
+  // 2. Hitung
+  $gajiPokok       = (float) $request->gaji_pokok;
+  $jumlahKotor     = $gajiPokok;
+  $jumlahPotongan  = 0;
+  $penghasilanData = [];
+  $potonganData    = [];
 
-        $inputNominal[$key] = (float) $value;
+  foreach (Master::all() as $item) {
+    $nilai = $nominal[$item->id_komponen] ?? 0;
+
+    if ($item->tipe === 'penghasilan') {
+      $jumlahKotor += $nilai;
+      $penghasilanData[] = [
+        'id_gaji'     => null,
+        'id_komponen' => $item->id_komponen,
+        'nominal'     => $nilai,
+      ];
     }
 
-    // masukkan kembali ke request
-    $request->merge(['nominal' => $inputNominal]);
+    if ($item->tipe === 'potongan') {
+      $jumlahPotongan += $nilai;
+      $potonganData[] = [
+        'id_gaji'     => null,
+        'id_komponen' => $item->id_komponen,
+        'nominal'     => $nilai,
+      ];
+    }
+  }
 
-        $request->validate([
-            'nip_pegawai' => 'required',
-            'periode' => 'required|string|max:50',
-            'gaji_pokok' => 'required|numeric',
-            'nominal' => 'nullable|array',
-            'nominal.*' => 'nullable|numeric'
-        ]);
+  $jumlahBersih = $jumlahKotor - $jumlahPotongan;
 
-        $pegawai = Pegawai::where('nip_pegawai', $request->nip_pegawai)->first();
-        if (!$pegawai) {
-            return back()->with('error', 'NIP pegawai tidak ditemukan!');
-        }
+  // 3. Simpan gaji utama
+  $gaji = Gaji::create([
+    'nip_pegawai'     => $request->nip_pegawai,
+    'periode'         => $request->periode,
+    'gaji_pokok'      => $gajiPokok,
+    'jumlah_kotor'    => $jumlahKotor,
+    'jumlah_potongan' => $jumlahPotongan,
+    'jumlah_bersih'   => $jumlahBersih,
+  ]);
 
-        $gajiPokok = (float) $request->gaji_pokok;
-        $nominal = $request->nominal ?? [];
+  // 4. Simpan detail
+  foreach ($penghasilanData as &$p) {
+    $p['id_gaji'] = $gaji->id_gaji;
+  }
 
-        $jumlahKotor = $gajiPokok;
-        $jumlahPotongan = 0;
+  foreach ($potonganData as &$p) {
+    $p['id_gaji'] = $gaji->id_gaji;
+  }
 
-        $penghasilanData = [];
-        $potonganData = [];
+  if ($penghasilanData) Penghasilan::insert($penghasilanData);
+  if ($potonganData) Potongan::insert($potonganData);
 
-        foreach (Master::all() as $item) {
-
-            $nilai = isset($nominal[$item->id_komponen])
-                ? (float) $nominal[$item->id_komponen]
-                : 0;
-
-            if ($item->tipe == 'penghasilan') {
-
-                $jumlahKotor += $nilai;
-
-                $penghasilanData[] = [
-                    'id_gaji'     => null,
-                    'id_komponen' => $item->id_komponen,
-                    'nominal'     => $nilai
-                ];
-            }
-
-            if ($item->tipe == 'potongan') {
-
-                $jumlahPotongan += $nilai;
-
-                $potonganData[] = [
-                    'id_gaji'     => null,
-                    'id_komponen' => $item->id_komponen,
-                    'nominal'     => $nilai
-                ];
-            }
-        }
-
-        $jumlahBersih = $jumlahKotor - $jumlahPotongan;
-
-        $gaji = Gaji::create([
-            'nip_pegawai'     => $request->nip_pegawai,
-            'periode'         => $request->periode,
-            'gaji_pokok'      => $gajiPokok,
-            'jumlah_kotor'    => $jumlahKotor,
-            'jumlah_potongan' => $jumlahPotongan,
-            'jumlah_bersih'   => $jumlahBersih
-        ]);
-
-        foreach ($penghasilanData as &$p) $p['id_gaji'] = $gaji->id_gaji;
-        foreach ($potonganData as &$p) $p['id_gaji'] = $gaji->id_gaji;
-
-        if (!empty($penghasilanData)) {
-            Penghasilan::insert($penghasilanData);
-        }
-
-        if (!empty($potonganData)) {
-            Potongan::insert($potonganData);
-        }
-
-        return redirect()
-            ->route('slipgaji.index')
-            ->with('success', 'Slip gaji dua tahun berhasil disimpan!');
-      }
+  return redirect()
+    ->route('slipgaji.index')
+    ->with('success', 'Slip gaji dua tahun berhasil disimpan!');
+}
 
     // menampilkan halaman edit
     public function edit($id)
@@ -306,112 +241,116 @@ public function store_bulanan(Request $request)
     }
 
     // proses update
-    public function update(Request $request, $id)
-    {
-      $gaji = Gaji::findOrFail($id);
-      $nominal = $request->nominal ?? [];
+    public function update(UpdateGajiRequest $request, $id)
+{
+  $gaji = Gaji::findOrFail($id);
 
-      $jumlahKotor = 0;
-      $jumlahPotongan = 0;
-      $gajiPokok = (float) ($request->gaji_pokok ?? 0);
+  // 1. Normalisasi nominal
+  $nominal = $request->nominal ?? [];
 
-      $penghasilanData = [];
-      $potonganData = [];
+  foreach ($nominal as $key => $value) {
+    $value = str_replace(['.', ','], '', $value);
+    $nominal[$key] = is_numeric($value) ? (float)$value : 0;
+  }
 
-      foreach (Master::all() as $item) {
-          $nilai = isset($nominal[$item->id_komponen]) ? (float)$nominal[$item->id_komponen] : 0;
+  // 2. Hitung ulang
+  $gajiPokok       = (float) $request->gaji_pokok;
+  $jumlahKotor     = $gajiPokok;
+  $jumlahPotongan  = 0;
+  $penghasilanData = [];
+  $potonganData    = [];
 
-          if ($item->tipe === 'penghasilan') {
-              $jumlahKotor += $nilai;
-              $penghasilanData[] = [
-                  'id_gaji' => $id,
-                  'id_komponen' => $item->id_komponen,
-                  'nominal' => $nilai,
-              ];
-          }
+  foreach (Master::all() as $item) {
+    $nilai = $nominal[$item->id_komponen] ?? 0;
 
-          if ($item->tipe === 'potongan' && $item->kategori === 'wajib') {
-              $jumlahPotongan += $nilai;
-              $potonganData[] = [
-                  'id_gaji' => $id,
-                  'id_komponen' => $item->id_komponen,
-                  'nominal' => $nilai,
-              ];
-          }
-
-      }
-
-      $jumlahKotor += $gajiPokok;
-      $jumlahBersih = $jumlahKotor - $jumlahPotongan;
-
-      DB::table('detailpenghasilan')->where('id_gaji', $id)->delete();
-      DB::table('detailpotongan')->where('id_gaji', $id)->delete();
-
-      if ($penghasilanData) Penghasilan::insert($penghasilanData);
-      if ($potonganData) Potongan::insert($potonganData);
-
-      $gaji->update([
-          'periode'         => $request->periode,
-          'gaji_pokok'      => $gajiPokok,
-          'jumlah_kotor'    => $jumlahKotor,
-          'jumlah_potongan' => $jumlahPotongan,
-          'jumlah_bersih'   => $jumlahBersih,
-      ]);
-
-      return redirect()->route('slipgaji.index')->with('success', 'Data slip gaji berhasil diperbarui!');
+    if ($item->tipe === 'penghasilan') {
+      $jumlahKotor += $nilai;
+      $penghasilanData[] = [
+        'id_gaji'     => $id,
+        'id_komponen' => $item->id_komponen,
+        'nominal'     => $nilai,
+      ];
     }
+
+    if ($item->tipe === 'potongan' && $item->kategori === 'wajib') {
+      $jumlahPotongan += $nilai;
+      $potonganData[] = [
+        'id_gaji'     => $id,
+        'id_komponen' => $item->id_komponen,
+        'nominal'     => $nilai,
+      ];
+    }
+  }
+
+  $jumlahBersih = $jumlahKotor - $jumlahPotongan;
+
+  // 3. Hapus detail lama
+  DB::table('detailpenghasilan')->where('id_gaji', $id)->delete();
+  DB::table('detailpotongan')->where('id_gaji', $id)->delete();
+
+  // 4. Simpan detail baru
+  if ($penghasilanData) Penghasilan::insert($penghasilanData);
+  if ($potonganData) Potongan::insert($potonganData);
+
+  // 5. Update gaji utama
+  $gaji->update([
+    'periode'         => $request->periode,
+    'gaji_pokok'      => $gajiPokok,
+    'jumlah_kotor'    => $jumlahKotor,
+    'jumlah_potongan' => $jumlahPotongan,
+    'jumlah_bersih'   => $jumlahBersih,
+  ]);
+
+  return redirect()
+    ->route('slipgaji.index')
+    ->with('success', 'Data slip gaji berhasil diperbarui!');
+}
 
 
     // proses update 2
-    public function update2(Request $request, $id)
+    public function update2(UpdateGajiBulananRequest $request, $id)
 {
-    $gaji = GajiB::findOrFail($id);
-    $nominal = $request->nominal ?? [];
+  $gaji = GajiB::findOrFail($id);
+  $nominal = $request->nominal ?? [];
 
-    DB::transaction(function () use ($id, $nominal, $gaji) {
+  DB::transaction(function () use ($gaji, $nominal) {
 
-        $totalPotongan = 0;
-        $potonganData = [];
+    $totalPotongan = 0;
+    $potonganData = [];
 
-        $komponenPotongan = Master::where('tipe', 'potongan')
-            ->where('kategori', 'lainnya')
-            ->get();
+    $komponenPotongan = Master::where('tipe', 'potongan')
+      ->where('kategori', 'lainnya')
+      ->get();
 
-        foreach ($komponenPotongan as $item) {
-            $nilai = isset($nominal[$item->id_komponen])
-                ? (float) $nominal[$item->id_komponen]
-                : 0;
+    foreach ($komponenPotongan as $item) {
+      $nilai = $nominal[$item->id_komponen] ?? 0;
+      $totalPotongan += $nilai;
 
-            $totalPotongan += $nilai;
+      $potonganData[] = [
+        'id_gaji_bulanan' => $gaji->id,
+        'id_komponen'     => $item->id_komponen,
+        'nominal'         => $nilai,
+      ];
+    }
 
-            $potonganData[] = [
-                'id_gaji_bulanan' => $gaji->id,
-                'id_komponen' => $item->id_komponen,
-                'nominal' => $nilai,
-            ];
-        }
+    DB::table('potonganbulanan')
+      ->where('id_gaji_bulanan', $gaji->id)
+      ->whereIn('id_komponen', $komponenPotongan->pluck('id_komponen'))
+      ->delete();
 
-        // hapus potongan lama (khusus kategori lainnya)
-        DB::table('potonganbulanan')
-            ->where('id_gaji_bulanan', $gaji->id)
-            ->whereIn('id_komponen', $komponenPotongan->pluck('id_komponen'))
-            ->delete();
+    if ($potonganData) {
+      PotonganB::insert($potonganData);
+    }
 
-        // insert potongan baru
-        if (!empty($potonganData)) {
-            PotonganB::insert($potonganData);
-        }
+    $gaji->update([
+      'total_potongan' => $totalPotongan,
+      'gaji_diterima'  => $gaji->gaji->jumlah_bersih - $totalPotongan,
+    ]);
+  });
 
-        // update gaji bulanan
-        $gaji->update([
-            'total_potongan' => $totalPotongan,
-            'gaji_diterima' => $gaji->gaji->jumlah_bersih - $totalPotongan,
-        ]);
-    });
-
-    return redirect()
-        ->route('slipgaji.index')
-        ->with('success', 'Potongan bulanan berhasil diperbarui!');
+  return redirect()
+    ->route('slipgaji.index')
+    ->with('success', 'Potongan bulanan berhasil diperbarui!');
 }
 
 
@@ -438,28 +377,29 @@ public function store_bulanan(Request $request)
     }
 
     // import file /2 tahun
-    public function importTetap(Request $request)
-    {
-        $request->validate(['file'=>'required|mimes:xlsx,xls,csv']);
-        try {
-            Excel::import(new GajiImportII, $request->file('file'));
-            return back()->with('success','Import 2-tahunan sukses.');
-        } catch (\Exception $e) {
-            return back()->with('error','Import gagal: '.$e->getMessage());
-        }
-    }
+    
+public function importTetap(ImportGajiDuaTahunRequest $request)
+{
+  try {
+    Excel::import(new GajiImportII, $request->file('file'));
+
+    return back()->with('success', 'Import 2-tahunan sukses.');
+  } catch (\Exception $e) {
+    return back()->with('error', 'Import gagal: '.$e->getMessage());
+  }
+}
 
     // import file per-bulan
-    public function importBulanan(Request $request)
-    {
-        $request->validate(['file'=>'required|mimes:xlsx,xls,csv']);
-        try {
-            Excel::import(new GajiImport, $request->file('file'));
-            return back()->with('success','Import bulanan sukses.');
-        } catch (\Exception $e) {
-            return back()->with('error','Import gagal: '.$e->getMessage());
-        }
-    }
+    public function importBulanan(ImportGajiBulananRequest $request)
+{
+  try {
+    Excel::import(new GajiImport, $request->file('file'));
+
+    return back()->with('success', 'Import bulanan sukses.');
+  } catch (\Exception $e) {
+    return back()->with('error', 'Import gagal: '.$e->getMessage());
+  }
+}
 }
 
 
