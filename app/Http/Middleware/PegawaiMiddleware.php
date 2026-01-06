@@ -14,6 +14,6 @@ class PegawaiMiddleware
             return $next($request);
         }
 
-        return redirect('/login')->with('error', 'Akses ditolak, khusus pegawai.');
+        return redirect('/login')->with('error', 'Akses ditolak.');
     }
 }

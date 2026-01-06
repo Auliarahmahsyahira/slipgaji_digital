@@ -8,6 +8,8 @@ class GajiB extends Model
 {
     protected $table = 'gaji_bulanan';
     protected $primaryKey = 'id';
+    public $incrementing = true;
+    protected $keyType = 'int'; 
     protected $fillable = ['nip_pegawai', 'periode', 'id_gaji', 'total_potongan', 'gaji_diterima',];
 
     // Relasi ke pegawai

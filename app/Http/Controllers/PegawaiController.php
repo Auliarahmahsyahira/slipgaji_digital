@@ -89,24 +89,34 @@ class PegawaiController extends Controller
   }
 
   public function data()
-  {
+{
     return DataTables::of(Pegawai::query())
-      ->addIndexColumn()
-      ->addColumn('aksi', function ($row) {
-        return '
-          <a href="'.route('pegawai.edit', $row->nip_pegawai).'" class="btn btn-sm btn-warning">
-            <i class="bi bi-pencil-square"></i>
-          </a>
-          <form action="'.route('pegawai.destroy', $row->nip_pegawai).'" method="POST" style="display:inline">
-            '.csrf_field().method_field('DELETE').'
-            <button class="btn btn-sm btn-danger" onclick="return confirm(\'Yakin hapus data ini?\')">
-              <i class="bi bi-trash"></i>
-            </button>
-          </form>
-        ';
-      })
-      ->addColumn('checkbox', fn () => '<input type="checkbox" class="checkItem">')
-      ->rawColumns(['aksi', 'checkbox'])
-      ->make(true);
-  }
+        ->addIndexColumn()
+
+        ->addColumn('checkbox', function ($row) {
+            return '<input type="checkbox"
+                           class="checkItem"
+                           name="ids[]"
+                           value="'.$row->nip_pegawai.'">';
+        })
+
+        ->addColumn('aksi', function ($row) {
+            return '
+              <a href="'.route('pegawai.edit', $row->nip_pegawai).'" class="btn btn-sm btn-warning">
+                <i class="bi bi-pencil-square"></i>
+              </a>
+              <form action="'.route('pegawai.destroy', $row->nip_pegawai).'" method="POST" style="display:inline">
+                '.csrf_field().method_field('DELETE').'
+                <button class="btn btn-sm btn-danger"
+                        onclick="return confirm(\'Yakin hapus data ini?\')">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </form>
+            ';
+        })
+
+        ->rawColumns(['aksi', 'checkbox'])
+        ->make(true);
+}
+
 }

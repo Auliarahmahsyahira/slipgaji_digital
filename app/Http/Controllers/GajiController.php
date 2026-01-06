@@ -354,7 +354,7 @@ public function store_bulanan(StoreGajiBulananRequest $request)
 }
 
 
-    // memilih data yang mau di hapus
+    //menghapus data gaji bulanan
     public function destroy($id)
 {
     // hapus detail potongan dulu
@@ -369,41 +369,4 @@ public function store_bulanan(StoreGajiBulananRequest $request)
         ->back()
         ->with('success', 'Data gaji bulanan berhasil dihapus!');
 }
-
-    // menampilkan halaman import file
-    public function showImportForm()
-    {
-          return view('admin.gaji.import');
-    }
-
-    // import file /2 tahun
-    
-public function importTetap(ImportGajiDuaTahunRequest $request)
-{
-  try {
-    Excel::import(new GajiImportII, $request->file('file'));
-
-    return back()->with('success', 'Import 2-tahunan sukses.');
-  } catch (\Exception $e) {
-    return back()->with('error', 'Import gagal: '.$e->getMessage());
-  }
 }
-
-    // import file per-bulan
-    public function importBulanan(ImportGajiBulananRequest $request)
-{
-  try {
-    Excel::import(new GajiImport, $request->file('file'));
-
-    return back()->with('success', 'Import bulanan sukses.');
-  } catch (\Exception $e) {
-    return back()->with('error', 'Import gagal: '.$e->getMessage());
-  }
-}
-}
-
-
-
-  
-
-

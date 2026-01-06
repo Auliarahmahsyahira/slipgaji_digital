@@ -62,17 +62,24 @@ class AuthController extends Controller
     return redirect()->route('login.nip');
   }
 
-  public function pegawai()
-  {
-    $pegawai = Auth::user()->pegawai;
+  public function pegawai(Request $request)
+{
+  $nip = Auth::user()->nip_pegawai;
+  $gaji = null;
 
-    $gaji = Gaji::with(['pegawai', 'penghasilan.master', 'potongan.master'])
-      ->where('nip_pegawai', $pegawai->nip_pegawai)
-      ->latest()
-      ->first();
+  if ($request->tahun) {
+  $tahun = $request->tahun;
 
-    return view('pegawai.dashboard', compact('gaji'));
-  }
+  $gaji = Gaji::with(['pegawai', 'penghasilan.master', 'potongan.master'])
+    ->where('nip_pegawai', $nip)
+    ->where('periode', 'like', "%{$tahun}%")
+    ->first();
+}
+
+  return view('pegawai.dashboard', compact('gaji'));
+}
+
+
 
   public function admin()
   {

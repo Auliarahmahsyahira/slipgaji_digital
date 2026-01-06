@@ -31,10 +31,4 @@ Route::middleware(['auth'])->group(function () {
   // Cek
   Route::get('/cek-gaji/{nip}', [GajiController::class, 'cekGajiTerbaru']);
   Route::get('/cek-nip/{nip}', [GajiController::class, 'cekNip'])->name('cek.nip');
-
-  // Import
-  Route::get('/gaji/import', [GajiController::class, 'showImportForm'])->name('gaji.import.form');
-  Route::post('/gaji/import/tetap', [GajiController::class, 'importTetap'])->name('gaji.import.tetap');
-  Route::post('/slipgaji/import/bulanan', [ImportController::class, 'importBulanan']);
-
 });

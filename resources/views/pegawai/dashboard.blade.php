@@ -5,6 +5,35 @@
 
   <h4 class="text-center fw-bold mb-4 text-dark">Slip Gaji</h4>
 
+  <form method="GET" action="{{ route('pegawai.dashboard') }}" class="row g-2 mb-4">
+  <div class="col-md-4">
+    <select name="bulan" class="form-select" required>
+      <option value="">Pilih Bulan</option>
+      @for ($i = 1; $i <= 12; $i++)
+        <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}"
+          {{ request('bulan') == str_pad($i, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
+          {{ \Carbon\Carbon::create()->month($i)->translatedFormat('F') }}
+        </option>
+      @endfor
+    </select>
+  </div>
+
+  <div class="col-md-4">
+    <select name="tahun" class="form-select" required>
+      <option value="">Pilih Tahun</option>
+      @for ($y = date('Y'); $y >= date('Y') - 5; $y--)
+        <option value="{{ $y }}" {{ request('tahun') == $y ? 'selected' : '' }}>
+          {{ $y }}
+        </option>
+      @endfor
+    </select>
+  </div>
+
+  <div class="col-md-4">
+    <button class="btn btn-primary w-100">Tampilkan</button>
+  </div>
+</form>
+
   @if ($gaji)
     {{-- CARD 1 --}}
     <div class="card shadow-sm mb-3 p-3" style="font-size: 0.9rem;">

@@ -16,6 +16,6 @@ class AdminMiddleware
         }
 
         // kalau bukan admin, redirect ke halaman login atau error
-        return redirect('/login')->with('error', 'Akses ditolak, khusus admin.');
+        return redirect('/login')->with('error', 'Akses ditolak.');
     }
 }

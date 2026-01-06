@@ -54,14 +54,6 @@
   </div>
 </div>
 
-{{-- Script untuk checkbox pilih semua --}}
-<script>
-  document.getElementById('checkAll').addEventListener('change', function() {
-    const checked = this.checked;
-    document.querySelectorAll('.checkItem').forEach(cb => cb.checked = checked);
-  });
-</script>
-
 <!-- Modal Import -->
 <div class="modal fade" id="modalImport" tabindex="-1">
   <div class="modal-dialog">
@@ -88,38 +80,42 @@
 <script>
 $(function () {
     let table = $('#tabelPegawai').DataTable({
-        processing: true,
-        serverSide: true,
-        ajax: "{{ route('pegawai.data') }}",
-        scrollX: true,
+    processing: true,
+    serverSide: true,
+    ajax: "{{ route('pegawai.data') }}",
 
-        dom: 'lfrtip',
-        paging: true,
-        pagingType: 'simple_numbers',
-        pageLength: 10,
-        lengthMenu: [10, 25, 50, 100],
+    rowId: 'nip_pegawai', // PENTING
+    scrollX: true,
 
-        columns: [
-            { data: 'aksi', orderable: false, searchable: false },
-            { data: 'checkbox', orderable: false, searchable: false },
-            { data: 'DT_RowIndex', orderable: false, searchable: false },
-            { data: 'nip_pegawai' },
-            { data: 'nama' },
-            { data: 'kdsatker' },
-            { data: 'jabatan' },
-            { data: 'no_rekening' },
-            { data: 'golongan' },
-            { data: 'nama_golongan' }
-        ],
+    dom: 'lfrtip',
+    paging: true,
+    pagingType: 'simple_numbers',
+    pageLength: 10,
+    lengthMenu: [10, 25, 50, 100],
 
-        language: {
-            url: "https://cdn.datatables.net/plug-ins/1.13.8/i18n/id.json"
-        }
-    });
+    columns: [
+        { data: 'aksi', orderable: false, searchable: false },
+        { data: 'checkbox', orderable: false, searchable: false },
+        { data: 'DT_RowIndex', orderable: false, searchable: false },
+        { data: 'nip_pegawai' },
+        { data: 'nama' },
+        { data: 'kdsatker' },
+        { data: 'jabatan' },
+        { data: 'no_rekening' },
+        { data: 'golongan' },
+    ],
 
-    $('#checkAll').on('change', function () {
-        $('.checkItem').prop('checked', this.checked);
-    });
+    language: {
+        url: "https://cdn.datatables.net/plug-ins/1.13.8/i18n/id.json"
+    }
+});
+$('#checkAll').on('change', function () {
+    $('.checkItem').prop('checked', this.checked);
+});
+
+$('#tabelPegawai').on('draw.dt', function () {
+    $('#checkAll').prop('checked', false);
+});
 });
 </script>
 
