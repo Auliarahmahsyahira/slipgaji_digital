@@ -9,11 +9,6 @@
 </div>
 
 <div class="d-flex justify-content-between align-items-center mb-3 px-4">
-    
-    <!-- Tombol Import tahun -->
-    <div>
-        <button class="btn btn-success px-4" style="background-color: #006316;" data-bs-toggle="modal" data-bs-target="#modalImporttahun">Import</button>
-    </div>
 
     <!-- SEARCH -->
      <div class="d-flex align-items-center gap-2">
@@ -296,61 +291,35 @@ document.querySelectorAll('input[type="checkbox"][name="ids[]"]').forEach(cb => 
 });
 </script>
 
-<!-- Modal Import 2 tahun-->
-<div class="modal fade" id="modalImportDuaTahun" tabindex="-1">
-  <div class="modal-dialog">
-    <form method="POST"
-          action="{{ route('slipgaji.store.duatahun') }}"
-          enctype="multipart/form-data"
-          class="modal-content">
-      @csrf
+<script>
+document.getElementById('nip').addEventListener('blur', function () {
+    const nip = this.value;
+    const namaInput = document.getElementById('nama');
+    const info = document.getElementById('nip-info');
 
-      <div class="modal-header">
-        <h5 class="modal-title">Import Slip Gaji Dua Tahun</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
+    if (nip.length === 0) {
+        namaInput.value = '';
+        info.textContent = '';
+        return;
+    }
 
-      <div class="modal-body">
-        <label class="form-label">Upload File Excel (.xlsx)</label>
-        <input type="file" name="file" class="form-control" required>
-        <small class="text-muted">
-          Format kolom harus sesuai ID komponen master
-        </small>
-      </div>
+    fetch(`/cek-nip/${nip}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                namaInput.value = data.nama;
+                info.textContent = '';
+            } else {
+                namaInput.value = '';
+                info.textContent = data.message;
+            }
+        })
+        .catch(() => {
+            info.textContent = 'Terjadi kesalahan saat cek NIP';
+        });
+});
+</script>
 
-      <div class="modal-footer">
-        <button type="submit" class="btn btn-primary">Import</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- Modal Import Bulanan-->
-<div class="modal fade" id="modalImportBulanan" tabindex="-1">
-  <div class="modal-dialog">
-    <form method="POST"
-          action="{{ route('slipgaji.store.bulanan') }}"
-          enctype="multipart/form-data"
-          class="modal-content">
-      @csrf
-
-      <div class="modal-header">
-        <h5 class="modal-title">Import Slip Gaji Bulanan</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-
-      <div class="modal-body">
-        <label class="form-label">Upload File Excel (.xlsx)</label>
-        <input type="file" name="file" class="form-control" required>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-        <button type="submit" class="btn btn-primary">Import</button>
-      </div>
-    </form>
-  </div>
-</div>
 
 <!-- Modal Create -->
 <div class="modal fade" id="modalCreate" tabindex="-1">

@@ -32,19 +32,26 @@ public function index(Request $request)
 
     // GAJI WAJIB
     $gajiWajib = Gaji::with(['pegawai', 'penghasilan', 'potongan'])
-        ->when($search, function ($query, $search) {
-            $query->where('nip_pegawai', 'like', "%{$search}%");
-        })
-        ->orderBy('created_at', 'desc')
-        ->get();
+    ->when($search, function ($query) use ($search) {
+        $query->whereHas('pegawai', function ($q) use ($search) {
+            $q->where('nama', 'LIKE', "%{$search}%")
+              ->orWhere('nip_pegawai', 'LIKE', "%{$search}%");
+        });
+    })
+    ->orderBy('created_at', 'desc')
+    ->get();
 
     // GAJI BULANAN
     $gajiBulanan = GajiB::with(['pegawai', 'gaji', 'potonganB'])
-        ->when($search, function ($query, $search) {
-            $query->where('nip_pegawai', 'like', "%{$search}%");
-        })
-        ->orderBy('created_at', 'desc')
-        ->get();
+    ->when($search, function ($query) use ($search) {
+        $query->whereHas('pegawai', function ($q) use ($search) {
+            $q->where('nama', 'LIKE', "%{$search}%")
+              ->orWhere('nip_pegawai', 'LIKE', "%{$search}%");
+        });
+    })
+    ->orderBy('created_at', 'desc')
+    ->get();
+
 
     return view('admin.gaji.index', compact('gajiWajib', 'gajiBulanan', 'search'));
 }
