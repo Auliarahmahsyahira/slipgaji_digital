@@ -8,32 +8,45 @@
   </h3>
 </div>
 
-<div class="d-flex justify-content-between align-items-center mb-3 px-4">
+<div class="d-flex justify-content-between align-items-center mb-2 px-4">
 
-    <!-- SEARCH -->
-     <div class="d-flex align-items-center gap-2">
-    <form action="{{ route('slipgaji.index')}}" method="GET" style="width:260px;">
-    <div class="input-group search-group">
-        <span class="input-group-text"><i class="bi bi-search"></i></span>
-        <input 
-            type="text" 
-            name="search" 
-            class="form-control" 
-            placeholder="Cari NIP..." 
-            value="{{ request('search') }}"
-        >
-    </div>
-</form>
+    <!-- KIRI (boleh kosong / judul kecil / filter nanti) -->
+    <h5 class="section-title mb-0">
+        Gaji Wajib Pegawai
+    </h5>
 
-<!-- CREATE ICON -->
+    <!-- KANAN -->
+    <div class="d-flex align-items-center gap-2">
+
+        <!-- SEARCH -->
+        <form action="{{ route('slipgaji.index') }}" method="GET" style="width:260px;">
+            <div class="input-group search-group">
+                <span class="input-group-text">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input 
+                    type="text" 
+                    name="search" 
+                    class="form-control" 
+                    placeholder="Cari NIP / Nama..."
+                    value="{{ request('search') }}"
+                >
+            </div>
+        </form>
+
+        <!-- CREATE ICON -->
         <button class="btn btn-success btn-icon"
                 title="Tambah Slip Gaji"
                 data-bs-toggle="modal"
                 data-bs-target="#modalCreate">
             <i class="bi bi-plus-lg"></i>
         </button>
+
     </div>
 </div>
+
+<hr class="section-divider">
+
 
 
 <div class="table-responsive mb-4" style="max-height: 400px; overflow-y: auto; margin-top:40px;">
@@ -140,9 +153,13 @@
 </div>
 </div>
 
- <div class="mb-3 px-4 text-start">
-    <button class="btn btn-success px-4" style="background-color: #006316;" data-bs-toggle="modal" data-bs-target="#modalImportBulanan">Import</button>
+ <div class="d-flex justify-content-between align-items-center mb-2 px-4 mt-5">
+    <h5 class="section-title mb-0">
+        Gaji Bulanan Pegawai
+    </h5>
 </div>
+
+<hr class="section-divider">
 
 <div class="table-responsive" style="max-height: 400px; overflow-y: auto; margin-top: 40px;">
   <table class="table table-bordered bg-white text-center align-middle">
@@ -430,6 +447,19 @@ h3 {
     font-size: 26px;
     letter-spacing: 0.5px;
 }
+
+.section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1f2937; /* abu gelap */
+    letter-spacing: 0.3px;
+}
+
+.section-divider {
+    border-top: 2px solid #e5e7eb;
+    margin: 10px 1.5rem 25px;
+}
+
 </style>
 
 @endsection
